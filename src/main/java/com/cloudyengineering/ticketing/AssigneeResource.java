@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.util.List;
 
 @Path("/api/assignee")
 public class AssigneeResource {
@@ -39,8 +40,9 @@ public class AssigneeResource {
 
     @GET
     @Produces(value = {"application/json"})
-    public Response getPaginatedAssignees(@QueryParam("page") Integer page, @QueryParam("offset") Integer offset) {
-        return Response.status(Response.Status.NOT_IMPLEMENTED).build();
+    public Response getPaginatedAssignees(@QueryParam("size") Integer size, @QueryParam("offset") Integer offset) {
+        List<Assignee> results = this.service.getPagedAssignees(offset, size);
+        return Response.ok(results).build();
     }
 
 

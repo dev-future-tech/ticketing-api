@@ -6,15 +6,22 @@ import io.quarkus.test.h2.H2DatabaseTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
+import java.util.stream.IntStream;
+
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.is;
 
 @QuarkusTest
 @QuarkusTestResource(H2DatabaseTestResource.class)
 @TestHTTPEndpoint(AssigneeResource.class)
 public class AssigneeResourceTest {
+
+    private final Logger log = LoggerFactory.getLogger(AssigneeResourceTest.class);
 
     @Inject()
     AssigneeService assigneeService;
@@ -55,14 +62,25 @@ public class AssigneeResourceTest {
     }
 
     @Test
-    void whenNotImplemented() {
-        given()
+    void whenGetPagedOffset() {
+        createAssignees();
+        String results = given()
                 .contentType(ContentType.JSON)
-                .queryParam("page", 1)
-                .queryParam("offset", 0)
+                .queryParam("size", 10)
+                .queryParam("offset", 3)
                 .when()
                 .get()
                 .then()
-                .statusCode(501);
+                .statusCode(200)
+        .body("size()", is(10)).extract().asString();
+
+        log.debug(results);
     }
+
+    void createAssignees() {
+        IntStream.range(1, 20).forEach(index ->
+                this.assigneeService.createAssignee(String.format("user_%d", index), String.format("user%d@home.com", index))
+        );
+    }
+
 }

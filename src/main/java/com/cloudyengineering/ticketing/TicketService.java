@@ -1,5 +1,6 @@
 package com.cloudyengineering.ticketing;
 
+import io.agroal.api.AgroalDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ public class TicketService {
     private final Logger log = LoggerFactory.getLogger(TicketService.class);
 
     @Inject
-    DataSource dataSource;
+    AgroalDataSource dataSource;
 
 
     public Long createTicket(String summary, String description) {

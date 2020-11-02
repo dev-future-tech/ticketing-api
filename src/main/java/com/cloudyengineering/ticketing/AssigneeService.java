@@ -1,5 +1,6 @@
 package com.cloudyengineering.ticketing;
 
+import io.agroal.api.AgroalDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +11,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.IntStream;
 
 @ApplicationScoped
 public class AssigneeService {
@@ -17,7 +19,7 @@ public class AssigneeService {
     private final Logger log = LoggerFactory.getLogger(AssigneeService.class);
 
     @Inject
-    DataSource dataSource;
+    AgroalDataSource dataSource;
 
     public void deleteAssigneeById(Long assigneeId) {
         String sql = "delete from assignees where user_id = ?";
@@ -81,8 +83,10 @@ public class AssigneeService {
     }
 
     public List<Assignee> getPagedAssignees(int offset, int size) {
+
         String query = "select * from assignees limit ? offset ?";
         List<Assignee> results = new ArrayList<>();
+
         try (Connection con = dataSource.getConnection()) {
             PreparedStatement pstmt = con.prepareStatement(query);
             pstmt.setInt(1, size);
@@ -92,7 +96,7 @@ public class AssigneeService {
 
             while(rs.next()) {
                 Assignee assignee = new Assignee();
-                assignee.setAssigneeId(rs.getLong("assignee_id"));
+                assignee.setAssigneeId(rs.getLong("user_id"));
                 assignee.setUsername(rs.getString("username"));
                 assignee.setEmailAddr(rs.getString("email_addr"));
                 results.add(assignee);
@@ -103,4 +107,5 @@ public class AssigneeService {
         }
         return results;
     }
+
 }
