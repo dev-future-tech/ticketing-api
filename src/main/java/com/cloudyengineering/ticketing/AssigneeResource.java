@@ -1,5 +1,10 @@
 package com.cloudyengineering.ticketing;
 
+import com.cloudyengineering.ticketing.client.ActionClient;
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.metrics.annotation.Timed;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +22,10 @@ public class AssigneeResource {
     @Inject()
     AssigneeService service;
 
+    @Inject()
+    @RestClient
+    ActionClient actionClient;
+
     @POST
     @Consumes(value={"application/json"})
     @Produces(value={"application/json"})
@@ -29,6 +38,15 @@ public class AssigneeResource {
         log.debug("Create user with username {} and email {}", username, email);
 
         Long assigneeId = this.service.createAssignee(username, email);
+
+        log.debug("Creating action for username {} with id {}", username, assigneeId);
+        Response resp = actionClient.createAction(String.format("Created a new assignee with id %d", assigneeId));
+        if(resp.getStatus() == 201) {
+            String location = resp.getHeaderString("Location");
+            log.info("Created the action message with returning location of {}", location);
+        } else {
+            log.info("Creation of Action failed. Status: {}", resp.getStatus());
+        }
         return Response.created(URI.create(String.format("/api/assignee/%d", assigneeId))).build();
     }
 
@@ -45,6 +63,8 @@ public class AssigneeResource {
 
     @GET
     @Produces(value = {"application/json"})
+    @Counted(name = "performedRetrievals", description = "How many paginated retrievals have been performed.")
+    @Timed(name = "checksTimer", description = "A measure of how long it takes to perform batch retrieval.", unit = MetricUnits.MILLISECONDS)
     public Response getPaginatedAssignees(@QueryParam("size") Integer size, @QueryParam("offset") Integer offset) {
         if (size == null) {
             size = 10;
