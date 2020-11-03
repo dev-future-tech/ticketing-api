@@ -19,13 +19,16 @@ public class AssigneeService {
     private final Logger log = LoggerFactory.getLogger(AssigneeService.class);
 
     @Inject
-    AgroalDataSource dataSource;
+    DataSource dataSource;
 
     public void deleteAssigneeById(Long assigneeId) {
         String sql = "delete from assignees where user_id = ?";
 
-        try (Connection con = dataSource.getConnection()) {
-            PreparedStatement pstmt = con.prepareStatement(sql);
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        try {
+            con = dataSource.getConnection();
+            pstmt = con.prepareStatement(sql);
             pstmt.setLong(1, assigneeId);
 
             int deletedRows = pstmt.executeUpdate();
@@ -33,17 +36,32 @@ public class AssigneeService {
             if (deletedRows < 1) {
                 log.info("No assignees deleted with id {}", assigneeId);
             }
+//            pstmt.close();
         } catch(Exception sqle) {
             log.error("Error deleting assignee {}", assigneeId, sqle);
+        } finally {
+            try{
+                assert pstmt != null;
+                pstmt.close();
+
+//                assert con != null;
+//                con.close();
+            } catch(Exception e) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
     public Long createAssignee(String username, String emailAddr) {
         String sql = "insert into assignees (username, email_addr) values (?, ?)";
+        log.debug("Creating user {} with email {}", username, emailAddr);
         Long assigneeId = null;
 
-        try (Connection con = dataSource.getConnection()) {
-            PreparedStatement pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        try {
+            con = dataSource.getConnection();
+            pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             pstmt.setString(1, username);
             pstmt.setString(2, emailAddr);
             int inserted = pstmt.executeUpdate();
@@ -54,10 +72,22 @@ public class AssigneeService {
                 if (rs.next()) {
                     assigneeId = rs.getLong(1);
                 }
+                rs.close();
             }
-        } catch(SQLException sqle) {
+            pstmt.close();
+        } catch(Exception sqle) {
             log.error("Error creating user {}", username, sqle);
             assigneeId = -1L;
+        } finally {
+            try {
+                assert con != null;
+                con.close();
+
+                assert pstmt != null;
+                pstmt.close();
+            } catch(Exception e) {
+                log.error(e.getMessage(), e);
+            }
         }
         return assigneeId;
     }
@@ -66,8 +96,12 @@ public class AssigneeService {
         String sql = "select * from assignees where user_id = ?";
 
         Assignee assignee = null;
-        try (Connection con = dataSource.getConnection()) {
-            PreparedStatement pstmt  = con.prepareStatement(sql);
+        Connection con = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            con = dataSource.getConnection();
+            pstmt = con.prepareStatement(sql);
             pstmt.setLong(1, assigneeId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
@@ -76,19 +110,34 @@ public class AssigneeService {
                 assignee.setUsername(rs.getString("username"));
                 assignee.setEmailAddr(rs.getString("email_addr"));
             }
+            rs.close();
+            pstmt.close();
         } catch (Exception sqle) {
             log.error("Error getting assignee with id {}", assigneeId, sqle);
+        } finally {
+            try {
+//                assert con != null;
+//                con.close();
+
+                assert pstmt != null;
+                pstmt.close();
+            } catch(Exception e) {
+                log.error(e.getMessage(), e);
+            }
         }
         return assignee;
     }
 
     public List<Assignee> getPagedAssignees(int offset, int size) {
 
-        String query = "select * from assignees limit ? offset ?";
+        String query = "select * from assignees order by user_id limit ? offset ?";
         List<Assignee> results = new ArrayList<>();
 
-        try (Connection con = dataSource.getConnection()) {
-            PreparedStatement pstmt = con.prepareStatement(query);
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        try {
+            con = dataSource.getConnection();
+            pstmt = con.prepareStatement(query);
             pstmt.setInt(1, size);
             pstmt.setInt(2, offset);
 
@@ -101,11 +150,57 @@ public class AssigneeService {
                 assignee.setEmailAddr(rs.getString("email_addr"));
                 results.add(assignee);
             }
+            rs.close();
+            pstmt.close();
         } catch (SQLException sqle) {
             log.error("Error getting assignees", sqle);
             return Collections.emptyList();
+        } finally {
+            try {
+                assert con != null;
+                con.close();
+
+                assert pstmt != null;
+                pstmt.close();
+
+            } catch(Exception e) {
+                log.error(e.getMessage(), e);
+            }
         }
         return results;
     }
 
+    public void saveAssignee(Assignee assignee) {
+        String update = "update assignees set username = ?, email_addr = ? where user_id = ?";
+
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        try {
+            con = this.dataSource.getConnection();
+            pstmt = con.prepareStatement(update);
+            pstmt.setString(1, assignee.getUsername());
+            pstmt.setString(2, assignee.getEmailAddr());
+            pstmt.setLong(3, assignee.getAssigneeId());
+
+            int updated = pstmt.executeUpdate();
+
+            if (updated < 1) {
+                log.error("Nothing updated.");
+            }
+
+            pstmt.close();
+        } catch (Exception e) {
+            log.error("Error updating assignee {}", assignee.getAssigneeId(), e);
+        } finally {
+            try {
+                assert con != null;
+                con.close();
+
+                assert pstmt != null;
+                pstmt.close();
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+    }
 }

@@ -7,10 +7,7 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 
 @ApplicationScoped
 public class TicketService {
@@ -26,7 +23,9 @@ public class TicketService {
 
         String sql = "insert into tickets(summary, description) values(?, ?)";
 
-        try (Connection con = dataSource.getConnection()) {
+        Connection con = null;
+        try {
+            con = dataSource.getConnection();
             PreparedStatement pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             pstmt.setString(1, summary);
             pstmt.setString(2, description);
@@ -38,10 +37,19 @@ public class TicketService {
                 if (rs.next()) {
                     ticketId = rs.getLong(1);
                 }
+                rs.close();
             }
+            pstmt.close();
         } catch(Exception e) {
             log.error("Error creating ticket", e);
             ticketId = -1L;
+        } finally {
+            try {
+                assert con != null;
+                con.close();
+            } catch(Exception sqle) {
+                log.error(sqle.getMessage(), sqle);
+            }
         }
 
         return ticketId;
