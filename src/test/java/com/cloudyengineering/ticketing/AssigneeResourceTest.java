@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.is;
 
 @QuarkusTest
 @QuarkusTestResource(H2DatabaseTestResource.class)
+@QuarkusTestResource(WiremockActions.class)
 @TestHTTPEndpoint(AssigneeResource.class)
 public class AssigneeResourceTest {
 
