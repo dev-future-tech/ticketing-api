@@ -22,7 +22,8 @@ jobs:
         java-version: 11.0.2
     - name: Build with Maven
       env:
-        DOCKERHUB_SECRET: ${{ secrets.DOCKER_HUB_SECRET }}
-        DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-      run: ./mvnw -B package --file pom.xml -Dquarkus.container-image.push=true -Dquarkus.container-image.username=$DOCKERHUB_USERNAME -Dquarkus.container-image.password=$DOCKERHUB_SECRET
+        QUARKUS_CONTAINER_IMAGE_PASSWORD: ${{ secrets.DOCKER_HUB_SECRET }}
+        QUARKUS_CONTAINER_IMAGE_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+        QUARKUS_CONTAINER_IMAGE_PUSH : true
+      run: ./mvnw -B package --file pom.xml
 
