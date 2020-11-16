@@ -1,7 +1,5 @@
 package com.cloudyengineering.ticketing;
 
-import io.quarkus.test.common.QuarkusTestResource;
-import io.quarkus.test.h2.H2DatabaseTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -13,7 +11,6 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 @QuarkusTest
-@QuarkusTestResource(H2DatabaseTestResource.class)
 public class AssigneeServiceTest {
 
     private final Logger log = LoggerFactory.getLogger(AssigneeServiceTest.class);
