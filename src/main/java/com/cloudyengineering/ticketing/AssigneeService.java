@@ -1,6 +1,6 @@
 package com.cloudyengineering.ticketing;
 
-import io.agroal.api.AgroalDataSource;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,12 +11,16 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
+import java.util.UUID;
 
 @ApplicationScoped
 public class AssigneeService {
 
     private final Logger log = LoggerFactory.getLogger(AssigneeService.class);
+
+    @Inject
+    @ConfigProperty(name = "multi-cloud.region", defaultValue = "local")
+    String region;
 
     @Inject
     DataSource dataSource;
@@ -36,16 +40,12 @@ public class AssigneeService {
             if (deletedRows < 1) {
                 log.info("No assignees deleted with id {}", assigneeId);
             }
-//            pstmt.close();
         } catch(Exception sqle) {
             log.error("Error deleting assignee {}", assigneeId, sqle);
         } finally {
             try{
                 assert pstmt != null;
                 pstmt.close();
-
-//                assert con != null;
-//                con.close();
             } catch(Exception e) {
                 log.error(e.getMessage(), e);
             }
@@ -53,7 +53,12 @@ public class AssigneeService {
     }
 
     public Long createAssignee(String username, String emailAddr) {
-        String sql = "insert into assignees (username, email_addr) values (?, ?)";
+        return this.createAssignee(username, emailAddr, null);
+    }
+    public Long createAssignee(String username, String emailAddr, String region) {
+        String setRegion = region != null ? region : this.region;
+
+        String sql = "insert into assignees (username, email_addr, global_id, region) values (?, ?, ?, ?)";
         log.debug("Creating user {} with email {}", username, emailAddr);
         Long assigneeId = null;
 
@@ -64,6 +69,8 @@ public class AssigneeService {
             pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             pstmt.setString(1, username);
             pstmt.setString(2, emailAddr);
+            pstmt.setString(3, UUID.randomUUID().toString());
+            pstmt.setString(4, setRegion);
             int inserted = pstmt.executeUpdate();
 
             if (inserted > 0) {
@@ -116,9 +123,6 @@ public class AssigneeService {
             log.error("Error getting assignee with id {}", assigneeId, sqle);
         } finally {
             try {
-//                assert con != null;
-//                con.close();
-
                 assert pstmt != null;
                 pstmt.close();
             } catch(Exception e) {
