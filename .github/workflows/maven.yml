@@ -25,4 +25,5 @@ jobs:
         DOCKERHUB_SECRET: ${{secrets.DOCKER_HUB_SECRET}}
         DOCKERHUB_USERNAME: ${{secrets.DOCKER_HUB_USERNAME}}
       run: |
+          echo "Username: $DOCKERHUB_USERNAME"
           ./mvnw -B package --file pom.xml -Dquarkus.container-image.push=true
