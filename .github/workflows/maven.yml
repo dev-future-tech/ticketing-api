@@ -25,8 +25,4 @@ jobs:
         DOCKERHUB_SECRET: ${{secrets.DOCKER_HUB_SECRET}}
         DOCKERHUB_USERNAME: ${{secrets.DOCKER_HUB_USERNAME}}
       run: |
-          ./mvnw -B package --file pom.xml -Dquarkus.container-image.push=true \
-            -Dquarkus.container-image.username=$DOCKERHUB_USERNAME \
-            -Dquarkus.container-image.password=$DOCKERHUB_SECRET \
-            -Dquarkus.jib.base-registry-username=$DOCKERHUB_USERNAME \
-            -Dquarkus.jib.base-registry-password=$DOCKERHUB_SECRET
+          ./mvnw -B package --file pom.xml -Dquarkus.container-image.push=true
