@@ -8,4 +8,4 @@ data:
   quarkus-profile: 'kubernetes'
   actions-host: 'actions.svc'
   actions-port: '8060'
-
+  multi-cloud-region: 'gcp-us-east-1'
