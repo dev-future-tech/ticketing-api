@@ -1,0 +1,62 @@
+= Ticketing API
+Anthony Ikeda <anthony.ikeda@gmail.com>
+Version 0.0.1
+
+:icons: font
+
+== Preparing the database
+
+First, create the database:
+
+[source,sql,numbered]
+----
+create database cloud_tickets_db;
+create user tickets_admin with password 'letmein';
+create user kafka_connect with password 'letmein';
+grant all on database cloud_tickets_db to tickets_admin;
+grant all on database cloud_tickets_db to kafka_connect;
+----
+
+== Configure the k8s instances
+
+Create the Config map:
+
+[source,yaml,numbered]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ticketing-config
+data:
+  postgresql-host: 'my-release-postgresql.default'
+  postgresql-username: 'tickets_admin'
+  quarkus-profile: 'kubernetes'
+  actions-host: 'actions.svc'
+  actions-port: '8060'
+----
+
+Create the secrets:
+
+[source,yaml,numbered]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ticketing-secrets
+stringData:
+  postgresql-password: "letmein"
+----
+
+Build the application:
+
+[source,bash]
+----
+$ ./mvnw -B package --file pom.xml -Dquarkus.container-image.push=true -Dquarkus-profile=test
+----
+
+And deploy the image:
+
+[source,bash]
+----
+$ kubectl apply -f target/kubernetes/kubernetes.yml
+----
