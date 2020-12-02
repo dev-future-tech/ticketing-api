@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ticketing-public-api
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: ticketing-api
+    app.kubernetes.io/version: 1.0-SNAPSHOT
+  ports:
+    - name: public
+      targetPort: 8080
+      port: 8080
+      protocol: TCP
