@@ -26,6 +26,8 @@
     <url>https://github.com/dev-future-tech/ticketing-api</url>
     <tag>HEAD</tag>
   </scm>
+
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -146,6 +148,13 @@
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>3.0.0-M1</version>
+        <configuration>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>
