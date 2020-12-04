@@ -1,8 +1,10 @@
 package com.cloudyengineering.ticketing;
 
-import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
-
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,17 +12,17 @@ import java.util.Collections;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 
 public class WiremockActions implements QuarkusTestResourceLifecycleManager {
 
     private final Logger log = LoggerFactory.getLogger(WiremockActions.class);
 
-    private WireMockServer wireMockServer;
-
     @Override
     public Map<String, String> start() {
-        wireMockServer = new WireMockServer();
+        WireMockServer wireMockServer = new WireMockServer(wireMockConfig().port(8090));
         wireMockServer.start();
+        WireMock.configureFor("localhost", 8090);
 
         stubFor(post(urlPathEqualTo("/api/action")).withQueryParam("action_name", equalTo("Created a new assignee with id 1"))
             .willReturn(aResponse()

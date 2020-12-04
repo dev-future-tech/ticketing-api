@@ -29,6 +29,7 @@ scrape_configs:
     - targets: ['localhost:9090']
 
   - job_name: 'ticketing-api'
+
     kubernetes_sd_configs:
       - role: pod
     relabel_configs:
