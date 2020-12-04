@@ -22,13 +22,13 @@ jobs:
         uses: whelk-io/maven-settings-xml-action@v11
         with:
           servers: |
-          '[
-            {
-              "id": "artifactory",
-              "username": "${env.ARTIFACTORY_USERNAME_REF}",
-              "password": "${env.ARTIFACTORY_TOKEN_REF}"
-            }
-          ]'
+            '[
+              {
+                "id": "artifactory",
+                "username": "${env.ARTIFACTORY_USERNAME_REF}",
+                "password": "${env.ARTIFACTORY_TOKEN_REF}"
+              }
+            ]'
       - name: Build with Maven
         env:
           QUARKUS_CONTAINER_IMAGE_PUSH : false
