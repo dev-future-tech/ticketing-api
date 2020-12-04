@@ -21,8 +21,8 @@ jobs:
       - name: Setup Maven settings.xml
         uses: whelk-io/maven-settings-xml-action@v11
         with:
-          servers: |
-            '[
+          servers: '
+            [
               {
                 "id": "artifactory",
                 "username": "${env.ARTIFACTORY_USERNAME_REF}",
