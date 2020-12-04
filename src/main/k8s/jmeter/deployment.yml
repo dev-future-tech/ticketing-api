@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jmeter
+  labels:
+    app.kubernetes.io/name: jmeter
+    app.kubernetes.io/version: "5.3"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: jmeter
+      app.kubernetes.io/version: "5.3"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: jmeter
+        app.kubernetes.io/version: "5.3"
+    spec:
+      volumes:
+        - name: datastore
+          hostPath:
+            path: /Users/m_771466/datastores/kubernetes_hostpath/jmeter
+        - name: mock-data
+          configMap:
+            name: test-mock-data
+            items:
+              - key: MOCK_DATA.csv
+                path: MOCK_DATA.csv
+              - key: env_urls.txt
+                path: env_urls.txt
+              - key: test_plan.jmx
+                path: test_plan.jmx
+      containers:
+        - name: jmeter
+          image: devfuturetech/jmeter
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: mock-data
+              mountPath: /plans
+            - name: datastore
+              mountPath: /output
+
+          command: ["jmeter", "-n", "-t", "/plans/test_plan.jmx", "-l", "/output/output.txt", "-j", "/output/output.log"]

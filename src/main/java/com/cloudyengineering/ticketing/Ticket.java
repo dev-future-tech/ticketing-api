@@ -11,7 +11,7 @@ public class Ticket {
 
     private String description;
 
-    private String assignee;
+    private String assigneeLink;
 
     public Long getTicketId() {
         return ticketId;
@@ -37,11 +37,11 @@ public class Ticket {
         this.description = description;
     }
 
-    public String getAssignee() {
-        return assignee;
+    public String getAssigneeLink() {
+        return assigneeLink;
     }
 
-    public void setAssignee(String assignee) {
-        this.assignee = assignee;
+    public void setAssigneeLink(String assigneeLink) {
+        this.assigneeLink = assigneeLink;
     }
 }

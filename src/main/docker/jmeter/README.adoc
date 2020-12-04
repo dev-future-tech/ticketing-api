@@ -1,0 +1,47 @@
+= JMeter Image
+Anthony Ikeda <anthony.ikeda@gmail.com>
+Version 0.0.1
+:icons: font
+:toc:
+
+== Overview
+
+Image wraps JMeter 5.3 for execution in a k8s environment.
+
+== Usage
+
+A user has been created `appuser` which is a non-root user to execute the `jmeter`
+command.
+
+The image can be executed with:
+
+----
+$ docker run devfuturetech/jmeter:5.3 jmeter -n -t <plan file> -l <output file> -j <log file>
+----
+
+For example:
+
+----
+docker run -v $PWD:/plans devfuturetech/jmeter jmeter -n -t /plans/Test\ Plan.jmx -l /plans/output.txt -j /plans/output.log
+----
+
+== Kubernetes Deployment
+
+This deployment currently uses `hostPath` to store the output from JMeter.
+
+If running on the cloud, an alternate Volume will need to be created
+to ensure the output data is store correctly.
+
+=== Create the configmap
+
+----
+$ kubectl create configmap test-mock-data --from-file src/main/docker/jmeter/MOCK_DATA.csv \
+  --from-file src/main/docker/jmeter/test_plan.jmx \
+  --from-file src/main/docker/jmeter/env_urls.txt
+----
+
+Then run the deployment:
+
+----
+$ kubectl apply -f src/main/k8s/jmeter/deployment.yml
+----
