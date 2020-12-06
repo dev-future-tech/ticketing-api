@@ -49,6 +49,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main'
+    outputs:
+      tag_version: ${{ steps.maven-release-version.outputs.proj_version }}
 
     steps:
       - uses: actions/checkout@v2
@@ -96,6 +98,23 @@ jobs:
           ARTIFACTORY_TOKEN:  ${{ secrets.ARTIFACTORY_TOKEN }}
           BUILD_ENV: 'github-actions'
         run: ./mvnw --batch-mode release:perform
+      - id: maven-release-version
+        name: Maven Release version
+        run: |
+          PROJ_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "::set-output name=proj_version::${PROJ_VERSION}"
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_SECRET }}
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          file: src/main/docker/Dockerfile.jvm
+          tags: devfuturetech/ticketing-api:${{ needs.release.outputs.tag_version }}
       - name: Rollback if failure
         if: ${{ failure() }}
         run: ./mvnw --batch-mode release:rollback
