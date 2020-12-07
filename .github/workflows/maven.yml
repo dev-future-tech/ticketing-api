@@ -103,6 +103,7 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v2
         with:
+          context: .
           push: true
           file: src/main/docker/Dockerfile.jvm
           tags: devfuturetech/ticketing-api:${{ steps.maven_release_version.outputs.proj_version }}
