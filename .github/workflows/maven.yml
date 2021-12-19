@@ -19,7 +19,7 @@ jobs:
         with:
           java-version: 11.0.2
       - name: Setup Maven settings.xml
-        uses: whelk-io/maven-settings-xml-action@v11
+        uses: whelk-io/maven-settings-xml-action@v20
         with:
           servers: '
             [
@@ -48,7 +48,7 @@ jobs:
         with:
           java-version: 11.0.2
       - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v11
+        uses: whelk-io/maven-settings-xml-action@v20
         with:
           servers: '
             [
